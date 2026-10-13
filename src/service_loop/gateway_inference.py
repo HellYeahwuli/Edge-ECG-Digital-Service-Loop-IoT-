@@ -12,12 +12,18 @@ import numpy as np
 
 class FrozenInt8Inference:
     def __init__(self, manifest_path: Path) -> None:
+        self.manifest_path = Path(manifest_path)
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-        if manifest.get("gate") != "Gate S: Software Evaluation Freeze" or manifest.get("status") != "passed":
-            raise ValueError("Gate S manifest is not passed")
+        gate_name = str(manifest.get("gate", ""))
+        if not gate_name.startswith("Gate S") or manifest.get("status") != "passed":
+            raise ValueError("a passed Gate S/Gate S2 manifest is required")
         artifact = Path(manifest["artifacts"]["int8_tflite"])
+        if not artifact.is_absolute() and not artifact.exists():
+            artifact = manifest_path.resolve().parents[2] / artifact
         if hashlib.sha256(artifact.read_bytes()).hexdigest() != manifest["artifacts"]["int8_tflite_sha256"]:
             raise ValueError("model_hash_mismatch")
+        self.manifest = manifest
+        self.artifact_path = artifact
         self.model_sha256 = manifest["artifacts"]["int8_tflite_sha256"]
         self.threshold = float(manifest["calibration"]["threshold"])
         self.coefficient = float(manifest["calibration"]["coefficient"])

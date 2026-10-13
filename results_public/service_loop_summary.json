@@ -1,0 +1,40 @@
+{
+  "evidence_class": "reviewed software-simulated service-loop summary; no raw ECG or per-record data",
+  "configuration_id": "Gate-S2-P0-O1-M1-L2-int8-policy-v1-local-mqtt-v5-qos1",
+  "model_sha256": "edea13aacdd5f6f9f94a3b73092f567f25b4dcade6133da4af7eb42aa2913776",
+  "threshold": 0.49,
+  "software_loop": {
+    "source_experiments": ["7", "8A", "Gate V"],
+    "gate_v_status": "passed",
+    "experiment_8a_baseline_sessions": 30,
+    "experiment_8a_baseline_windows_acknowledged": "1200/1200",
+    "experiment_7_sessions": 30,
+    "experiment_7_inference_windows": 1020,
+    "experiment_7_p95_neural_inference_ms": 0.4976,
+    "experiment_7_p95_logical_acquisition_to_local_decision_ms": 423.79,
+    "accepted_event_audit_completeness": 1.0
+  },
+  "post_gate_v_exploration": {
+    "source_experiments": ["8A real ECG replay", "8A causal-detector-to-MQTT bridge"],
+    "packet_local_proxy_replay_windows_accepted": "300/300",
+    "causal_bridge_raw_packets_received": 600,
+    "causal_bridge_eligible_events_acknowledged": "286/286",
+    "causal_bridge_baseline_fragments_without_eligible_events": 2,
+    "channel_1_loss_no_event_reacquisition_fallback_demonstrated": false
+  },
+  "robustness": {
+    "source_experiment": "6, Parts 1 and 2",
+    "status": "completed under frozen configuration",
+    "primary_channel_dropout": "No eligible classifier events from the fixed channel-1 causal detector"
+  },
+  "source_artifacts_sha256": {
+    "results/experiment6_part1/summary.json": "28fdef9d4d607ca50f13835070b6230cea0d5ec91ba844ea8da5dbd8b52899aa",
+    "results/experiment6_part2/summary.json": "106dffc45db753b1d047e13f0179518425bd4ac1b3dc46fb4bbde3e318924b23",
+    "results/experiment7/summary.json": "bf4c68c06fa25d7dc382fdb164c0ac3c23743c94e9ec7a667d9ae49dfaa20572",
+    "results/experiment8a/summary.json": "279f591fbc6509a8544f2f13fe089c1b88627fe6501606d8e810bb4e2e8027ea",
+    "results/gate_v/decision.json": "d585e0d20159b728db5a811685919a267ebd153318b2f7506faba843352ded76",
+    "results/experiment8a_real_replay/summary.json": "85dd9fc05f3862c61b6f13e7154895b9782b2446070577f9bf95654c4959ab9a",
+    "results/experiment8a_causal_bridge/summary.json": "144727446fe67428e03b42d78034b9fd3e0577d016f1bb7c886b14c9fc2a1db8"
+  },
+  "claim_boundary": "Software simulation and runtime only; no physical acquisition, hardware latency or energy, wearable suitability, clinical efficacy, or no-event reacquisition fallback is established."
+}

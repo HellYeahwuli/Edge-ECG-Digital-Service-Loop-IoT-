@@ -12,10 +12,11 @@
 | 3 | Complete | Frozen SVDB evaluation |
 | 4 | Complete | Frozen NSRDB false-alarm evaluation |
 | 5 | Complete | Reference versus automatic R-peak evaluation |
-| 6 | Not started | Robustness and fault injection |
-| 7 | Not started | Declared endpoint, transport, and gateway benchmark |
-| 8A | Not started | Software-only local orchestration benchmark |
-| 8B / Gate H | Not started | Declared-hardware loop confirmation |
+| 6 | Complete | Frozen-model robustness and fault injection |
+| 7 | Complete; MQTT v5 loopback | 1,020-window, 30-session software runtime and local-loop benchmark; no hardware claim |
+| 8A | Complete; MQTT v5 loopback | Primary software-only local orchestration and fault-injection benchmark |
+| 8B / Gate H | Not applicable | Hardware extension outside the advisor-approved software-only scope |
+| Gate V | Passed | Matching MQTT Experiment 7 and 8A artifacts; software-simulated service-loop claim only |
 
 External test data were not used for architecture, threshold, calibration,
 lead-profile, seed, or quantization selection.

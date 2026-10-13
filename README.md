@@ -4,15 +4,21 @@ Research code and lightweight evidence for an auditable PVC-risk service loop
 between an ECG acquisition endpoint and a local edge gateway. The intended
 submission target is IEEE Internet of Things Magazine.
 
+The research position is service-loop-first: the frozen PVC model is the
+interpretation component in a sensing-to-feedback healthcare service chain,
+not the paper's standalone primary contribution. See the verified
+[CFP alignment](docs/cfp-alignment.md) and the
+[governance/threat boundary](docs/service-loop-governance.md).
+
 > This is research software, not a medical device or diagnostic system. It
 > does not provide clinical efficacy, regulatory, or therapeutic claims.
 
 ```text
-ECG acquisition endpoint
-  sensing, timestamps, sequence numbers, bounded buffer
+Simulated ECG acquisition endpoint
+  replay, timestamps, sequence numbers, bounded software buffer
         |
         v
-Local edge gateway
+Local gateway process
   signal quality, causal R peaks, int8 PVC inference, local policy, audit
         |
         v
@@ -20,14 +26,16 @@ Endpoint acknowledgement: monitor, reacquire, buffer, or request review
 ```
 
 The latency-critical loop is designed to be local and cloud-independent. The
-current endpoint replay and in-memory transport components are simulations;
-they do not establish physical acquisition, energy, or hardware latency.
+endpoint replay, local transport, and gateway process are software
+simulation/runtime components; they do not establish physical acquisition,
+energy, or hardware latency.
 
 ## Research Status
 
-The published software evidence includes Experiment 0-5 records, the passed
+The published software evidence includes Experiment 0-6 records, the passed
 Gate S2 direct-int8 software freeze, frozen SVDB evaluation, NSRDB false-alarm
-evaluation, and the automatic R-peak analysis. The selected frozen software
+evaluation, automatic R-peak analysis, and frozen-model robustness evaluation.
+The selected frozen software
 configuration is P0/O1, M1 (MIT-BIH + INCART), and L2 (two fixed channels),
 with a threshold of `0.49`.
 
@@ -35,9 +43,15 @@ The original Gate S pointwise p99 criterion failed and remains a disclosed
 negative result. Gate S2 passed under TensorFlow 2.15.1. SVDB is reported as
 an isolated cross-database holdout, not a pristine blind test.
 
-Experiment 6, Experiment 8A, Experiment 7, Experiment 8B, and Gate H are not
-complete. This release must not be described as a measured physical two-tier
-edge healthcare deployment.
+Experiment 8A, Experiment 7, and Gate V are complete as software-only MQTT
+loopback evidence. Experiment 8B and Gate H are outside the current
+software-only scope. This release must not be described as a measured physical
+two-tier edge healthcare deployment.
+
+The study validates a software-simulated two-tier local-edge service loop
+consisting of a replay-based ECG acquisition endpoint and a local gateway
+process. The results do not establish physical ECG acquisition, hardware
+latency, energy consumption, or wearable deployment suitability.
 
 | Evidence | Current result |
 |---|---|
@@ -68,6 +82,17 @@ The demo verifies schema handling, idempotency, sequence checks, model-hash
 rejection, and the policy-v1 persistent-risk action. It is a non-benchmark
 contract demonstration, not an Experiment 8A result.
 
+The formal software-only path uses `src/38_experiment8a_service_loop.py`,
+`src/39_experiment7_runtime_benchmark.py`, and
+`src/40_gate_v_software_loop_validation.py`. Experiment 8A defaults to a
+loopback Mosquitto MQTT v5 broker; the in-memory adapter remains a preflight
+and unit-test transport rather than primary performance evidence.
+
+Post-Gate-V replay and the exploratory causal-detector-to-MQTT bridge are
+documented in [research status](docs/research-status.md). Two bridge fragments
+produced no eligible events, and a no-event reacquisition fallback during
+channel-1 loss was not demonstrated.
+
 For the passed Gate S2 runtime family, install
 `requirements-gate-s2.txt`. It pins TensorFlow `2.15.1`; the general
 development requirements intentionally do not claim to reproduce Gate S2.
@@ -83,6 +108,9 @@ summaries under [results_public](results_public). Full results, window caches,
 per-record predictions, raw data, training logs, and unapproved weights remain
 in a restricted research archive. A public GitHub Release is not private
 storage.
+
+The [public service-loop summary](results_public/service_loop_summary.json)
+links the Gate V and post-Gate-V findings to hashes of the local source artifacts.
 
 ## Reproduction Boundaries
 

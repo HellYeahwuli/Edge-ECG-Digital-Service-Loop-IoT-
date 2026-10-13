@@ -5,11 +5,11 @@
 - Origin Skill: `ars-codex:academic-research-suite`
 - Origin Route: `academic-pipeline` Stage 1 / methodology planning
 - Origin Date: 2026-08-02
-- Version: `research_plan_v4`
-- Last Updated: 2026-08-21
+- Version: `research_plan_v7_cfp_writing_and_bounded_replay`
+- Last Updated: 2026-10-09
 - Verification Status: `PARTIALLY VERIFIED`
-- Verified Evidence: official special-issue CFP, advisor-approved two-tier edge architecture decision, local source code, Experiment 0 audit, Experiment 1/2 development reports, Experiment 2.5/2.6/2.6R and final revalidation evidence, Gate S2 direct-int8 software freeze, frozen SVDB and NSRDB reports, final automatic R-peak evaluation, and focused literature verification supporting Experiment 2.5
-- Not Yet Verified: literature-level novelty, Experiment 6 robustness/fault-injection performance, declared acquisition-endpoint/local-link/gateway measurements, software-only Experiment 8A benchmark evidence, and declared-hardware Experiment 8B/Gate H local service-loop results
+- Verified Evidence: official special-issue CFP and IEEE Internet of Things Magazine author guidelines, advisor-approved two-tier logical edge architecture decision, local source code, Experiment 0 audit, Experiment 1/2 development reports, Experiment 2.5/2.6/2.6R and final revalidation evidence, Gate S2 direct-int8 software freeze, frozen SVDB and NSRDB reports, final automatic R-peak evaluation, Experiment 6 robustness and fault-injection reports, Experiment 7 runtime benchmark, Experiment 8A MQTT v5 service-loop benchmark, Gate V decision, completed packet-local-proxy real ECG replay, completed exploratory causal-detector-to-MQTT bridge and channel-1-loss diagnostic, cross-layer attribution synthesis, focused literature verification supporting Experiment 2.5, and the targeted primary-source check recorded in `docs/literature-matrix.md` on 9 October 2026.
+- Not Yet Verified: exhaustive literature-level novelty wording, final manuscript citation and metadata audit, final figure review, internal review, and submission packaging. A no-event reacquisition fallback is **not demonstrated** and must remain an observed limitation.
 
 ## 1. Purpose of This File
 
@@ -22,18 +22,28 @@ Future work must update the status table and evidence paths in this file after e
 - Venue: IEEE Internet of Things Magazine
 - Special Issue: **Digital Service Loops for IoT-Enabled Connected Healthcare Systems**
 - Official CFP: <https://www.comsoc.org/publications/magazines/ieee-internet-things-magazine/cfp/digital-service-loops-iot-enabled>
+- Official author guidelines: <https://www.comsoc.org/publications/magazines/ieee-internet-things-magazine/policies-guidelines>
 - Manuscript submission deadline: **31 October 2026**
 - Initial decision date: 31 January 2027
 - Planned publication: Third Quarter 2027
+
+### Magazine Submission Constraints
+
+- Main text from Introduction through Conclusion must be at most **4,500 words**; title, author information, abstract, figures, tables, captions, acknowledgements, references, and biographies are excluded by the author guidelines.
+- Published figures and tables combined must total at most **six**. Do not evade this cap through crowded multi-panel figures or undersized tables.
+- Use at most **15 references**, numbered in citation order. Verify every cited claim against its source; include an access date for online references as required by the author guidelines.
+- Write for a broad IoT/communications readership in an accessible, tutorial style. Avoid mathematical notation; the guidelines permit at most two simple equations only when justified.
+- The magazine does not require a specific submission template. Prepare an editable final manuscript and separate figure source files; confirm ORCIDs for all authors and keep any author biographies within 150 words each.
+- Check the applicable special-issue article type and final portal requirements before submission. The deadline is **31 October 2026**.
 
 The CFP defines a digital service loop as a continuous cycle of sensing, interpretation, decision-making, execution, and validation. It lists edge/fog/cloud integration among relevant deployment patterns, but it does not require every paper to use every tier. This project adopts an advisor-approved two-tier local-edge architecture: an ECG acquisition endpoint plus a local edge gateway. Cloud computation is not required for the operational loop.
 
 Therefore, this project must not be framed as merely a higher-accuracy ECG classifier. The PVC model is the interpretation component inside a verifiable service loop:
 
 ```text
-ECG acquisition endpoint: sensing, timestamps, sequence numbers, and short local buffering
+Simulated ECG acquisition endpoint: replay, timestamps, sequence numbers, and short local buffering
   -> local endpoint-to-gateway transport
-  -> local edge gateway: signal quality, resampling, and causal R-peak interpretation
+  -> local gateway process: signal quality, resampling, and causal R-peak interpretation
   -> calibrated PVC-risk event
   -> gateway-local policy decision
   -> safe service action
@@ -43,11 +53,16 @@ ECG acquisition endpoint: sensing, timestamps, sequence numbers, and short local
 
 ### Advisor-Approved Deployment Boundary
 
-- Tier 1 is the **ECG acquisition endpoint**. It acquires one or two configured channels, attaches timing and sequence metadata, maintains a bounded short-term buffer, transmits locally, and receives monitor/reacquire acknowledgements.
-- Tier 2 is the **local edge gateway**. It reconstructs the stream, evaluates signal quality, resamples to 360 Hz, detects R peaks, extracts windows, runs calibrated PVC inference, applies the versioned service policy, records the audit trail, and returns acknowledgement.
+- Tier 1 is the **simulated ECG acquisition endpoint**. A replay process emits one or two configured channels, attaches timing and sequence metadata, maintains a bounded simulated buffer, transmits locally, and receives monitor/reacquire acknowledgements.
+- Tier 2 is the **local gateway process**. It reconstructs the simulated stream, evaluates signal quality, resamples to 360 Hz, detects R peaks, extracts windows, runs calibrated PVC inference, applies the versioned service policy, records the audit trail, and returns acknowledgement.
 - The latency-critical sensing-to-decision-to-feedback loop must close locally between these two tiers even when Internet connectivity is absent.
 - A remote caregiver or telehealth review request may be an optional outbound action after the local decision. Remote review is not a model-inference tier and is not required to close the measured local loop.
-- A replay-based acquisition endpoint is acceptable for repeatable early fault injection, but it must be labelled simulated. It cannot support claims about physical electrode acquisition latency, analogue-front-end energy, or wearable deployment.
+- The replay-based acquisition endpoint and local transport are software simulation components for the complete study. They must be labelled simulated and cannot support claims about physical electrode acquisition latency, analogue-front-end energy, hardware resource use, or wearable deployment.
+
+The study validates a software-simulated two-tier local-edge service loop
+consisting of a replay-based ECG acquisition endpoint and a local gateway
+process. The results do not establish physical ECG acquisition, hardware
+latency, energy consumption, or wearable deployment suitability.
 
 ### In-Scope Service Actions
 
@@ -71,11 +86,11 @@ ECG acquisition endpoint: sensing, timestamps, sequence numbers, and short local
 
 ### Software-First Sequencing and Dual-Freeze Policy
 
-This project uses two separate evidence gates. **Gate S: Software Evaluation Freeze** fixes the architecture, development sources, seed policy, weights, calibration, threshold, lead mapping, preprocessing, int8 artifact, and manifest before frozen external model evaluation. Gate S does not require declared endpoint, transport, or gateway hardware and must never be described as an edge-deployment result.
+This project uses two separate evidence gates. **Gate S: Software Evaluation Freeze** fixes the architecture, development sources, seed policy, weights, calibration, threshold, lead mapping, preprocessing, int8 artifact, and manifest before frozen external model evaluation. Gate S does not require physical hardware and must not be described as a measured device-deployment result.
 
-**Gate H: Deployment Freeze** fixes the acquisition endpoint, local transport profile, gateway hardware/OS/runtime, queue configuration, and clock-synchronization method after declared-hardware measurements. Gate H requires Experiment 7 and Experiment 8B evidence before the paper may claim a measured two-tier local-edge service loop.
+**Gate V: Software Loop Validation** fixes the simulated endpoint, simulated local transport, gateway runtime, queue configuration, fault-injection profile, and clock method. Gate V requires Experiment 7 and Experiment 8A evidence before the paper may claim a validated software-simulated two-tier local-edge service loop.
 
-Experiments 3-6 may follow Gate S before Gate H. SVDB and NSRDB must never be used to choose architecture, calibration, threshold, quantization, lead profile, or any hardware-failure fallback. If Gate H fails for the software-frozen L2 model, either report the deployment mismatch transparently or start the predeclared L1 fallback from development data and a new Gate S manifest; do not select using observed external-test performance.
+Experiments 3-6 may follow Gate S before Gate V. SVDB and NSRDB must never be used to choose architecture, calibration, threshold, quantization, lead profile, or any fallback. No physical hardware experiment is required for this research version; any future hardware study is separate and exploratory.
 
 ## 3. Current Project Status
 
@@ -85,12 +100,12 @@ Experiments 3-6 may follow Gate S before Gate H. SVDB and NSRDB must never be us
 | Waveform + pre-RR baseline | Complete | `models/pvc_rr_calibrated_metrics.json` | Causal rhythm-feature comparison |
 | Waveform + pre/post-RR baseline | Complete | `models/pvc_prepost_rr_calibrated_metrics.json` | Delayed-decision upper comparison, not preferred edge model |
 | Frozen INCART evaluation | Complete, historical | `models/incart_external_frozen_metrics.json` | Cannot remain final external evidence after INCART enters training |
-| Automatic R-peak exploratory evaluation | Complete, exploratory | `models/streaming_rpeak_*_metrics.json` | Shows pipeline degradation; must be repeated with the final model |
+| Automatic R-peak exploratory evaluation | Complete, historical | `models/streaming_rpeak_*_metrics.json` | Shows pipeline degradation; the final-model evaluation is complete in Experiment 5 |
 | Multi-source audit and preprocessing contract | Complete | `results/experiment0/` | Experiment 0 passed |
-| Advisor-approved deployment architecture | Conceptual boundary frozen; exact endpoint, transport, and gateway identities pending | AGENTS.md Section 8 | ECG acquisition endpoint plus local edge gateway; cloud-independent critical loop |
+| Advisor-approved deployment architecture | Software identities and MQTT v5 loopback evidence complete; physical deployment out of scope | AGENTS.md Section 8, `src/service_loop/`, `results/experiment7/`, `results/experiment8a/`, `results/gate_v/decision.json` | Simulated ECG acquisition endpoint plus local gateway process; cloud-independent critical loop |
 | Multi-source model training | Complete | `results/experiment1/runs.csv`, `results/experiment1/summary.json`, `results/experiment1/per_record_predictions/` | M0/M1/M2 each completed with five outer folds and three fixed seeds; development evidence only. |
-| Single- versus two-lead comparison | Complete; L2 is the software-development lead profile pending deployment evidence | `results/experiment2/summary.json`, `results/experiment2/completion.json`, `results/experiment2/runs.csv`, `results/experiment2/per_record_predictions/` | L1/L2 each completed with five outer folds and three fixed seeds. L2 may enter Gate S after final-architecture revalidation; its endpoint acquisition, transport bandwidth, and gateway resource suitability remain a Gate H decision. |
-| Pre-freeze model optimization | Experiment 2.5 development decision recorded; software-freeze evidence remains pending | `results/experiment2_5/` | O1 is the preregistered control for the one bounded Experiment 2.6 refinement. O2 had higher paired PVC-record F1 but increased PVC-free-record false positives, violating the safety gate. SVDB and NSRDB remain inaccessible. |
+| Single- versus two-lead comparison | Complete; L2 is the software-frozen lead profile | `results/experiment2/summary.json`, `results/experiment2/completion.json`, `results/experiment2/runs.csv`, `results/experiment2/per_record_predictions/` | L1/L2 each completed with five outer folds and three fixed seeds. L2 is retained for the software-simulated endpoint and gateway loop; no physical acquisition claim follows. |
+| Pre-freeze model optimization | Complete; historical development decision | `results/experiment2_5/` | O1 was retained after bounded refinement; O2 increased PVC-free-record false positives. Gate S2 and frozen external evaluations subsequently completed without using SVDB/NSRDB for selection. |
 | Experiment 2.6 controlled refinement | Complete; P0 selected, therefore O1 retained | `results/experiment2_6/protocol.json`, `results/experiment2_6/runs.csv`, `results/experiment2_6/summary.json` | P1 did not improve paired PVC-record F1 and slightly increased PVC-free false decisions; P2/P3 failed the Stage A PVC-free safety gate. No additional architecture search is permitted. |
 | Experiment 2.6R Recall-stability revision | Complete; no candidate advanced beyond Stage A | `results/experiment2_6r/` | R1 violated the PVC-free safety gate; R2 met recall and safety but failed F1 non-inferiority; R3 found no feasible inner-fold safety threshold and reproduced P0. P0/O1 remains retained and model search stops. |
 | Final-architecture M0/M1/M2 and L1/L2 revalidation | Complete; M1/L2 retained | `results/final_revalidation/summary.json`, `results/final_revalidation/runs.csv` | 60 runs completed with five record-level folds and three fixed seeds. M1/L2 reproduces the P0/O1 metrics; M1 versus M0 paired F1 CI crosses zero; M2 increases recall but materially reduces F1 and increases PVC-free false decisions; L2 improves paired F1 over L1 with a positive bootstrap lower bound. No external data were accessed. |
@@ -100,10 +115,15 @@ Experiments 3-6 may follow Gate S before Gate H. SVDB and NSRDB must never be us
 | Frozen SVDB evaluation | Complete; frozen int8 P0/O1 evaluated once on SVDB | `results/experiment3/protocol.json`, `results/experiment3/summary.json`, `results/experiment3/per_record_metrics.csv`, `results/experiment3/integrity_verification.json` | Under the passed Gate S2 artifact, fixed calibration, and threshold `0.49`, the oracle-annotation SVDB evaluation yielded support-aware record-macro PVC F1 `0.6736` (record-bootstrap 95% CI `0.5945` to `0.7493`), recall `0.7154`, precision `0.7411`, record-macro AUPRC `0.8087`, Brier `0.0323`, and pooled confusion matrix TN/FP/FN/TP `158070/4196/2660/7280`. This is an isolated cross-database holdout, not a pristine blind test; no tuning or selection followed. |
 | NSRDB false-alarm evaluation | Complete; frozen int8 P0/O1 evaluated once on NSRDB | `results/experiment4/protocol.json`, `results/experiment4/summary.json`, `results/experiment4/per_record_false_alarms.csv`, `results/experiment4/integrity_verification.json` | At fixed threshold `0.49`, 1,113 false PVC detections occurred over 1,729,496 annotated `N` beats and 437.49 h: false-positive rate `0.000644` and 2.544 false PVC detections/h. Under the existing `policy-v1` three-events-in-30-s aggregation, the overall false service-escalation rate was `0.606/h` (aggregate target <= `1/h`), but the record-bootstrap 95% CI was `0.037` to `1.638/h` and worst record `nsrdb:16272` was `9.0/h`; the target is therefore not uniformly supported across records. Signal-quality and automatic-R-peak relationships remain deferred to Experiment 5. No tuning or selection followed. |
 | Final automatic R-peak evaluation | Complete; frozen int8 P0/O1 evaluated with the existing causal detector | `results/experiment5_retry2/protocol.json`, `results/experiment5_retry2/summary.json`, `results/experiment5_retry2/per_record_metrics.csv`, `results/experiment5_retry2/per_record_predictions.npz` | Across 219 records, 218 had eligible N/V classifier windows; `mitdb:232` had none after the fixed boundary exclusion and remains detector-only. At the immutable threshold `0.49`, automatic R-peak detection had sensitivity `0.9522`, PPV `0.9956`, and F1 `0.9734`. Pooled PVC recall fell from `0.8741` with reference peaks to `0.7762` with automatic peaks (F1 `0.8531` to `0.8078`); the PVC-miss decomposition was 3,325 unmatched V peaks, 317 window-mislocalizations, and 4,660 classifier-or-causal-RR errors. No detector, model, calibration, threshold, quantization, preprocessing, lead profile, or seed selection followed. Initial and retry-1 evaluator crashes are preserved under `results/experiment5/` and `results/experiment5_retry1/`; their boundary-case repairs did not change the frozen system. |
-| Robustness and fault injection | Not started | Planned Experiments 6 and 8 | Mandatory for service-loop claim |
-| Two-tier edge hardware benchmark | Not started; intentionally scheduled after software evaluation and Experiment 8A | Planned Experiment 7 / Gate H | Mandatory for the acquisition-endpoint plus local-gateway claim |
-| Software-only local orchestration and feedback prototype | Not started | Planned Experiment 8A | Uses an explicitly simulated replay endpoint and local MQTT v5 transport; cannot support physical acquisition, hardware latency, or energy claims. |
-| Declared-hardware local orchestration and feedback confirmation | Not started | Planned Experiment 8B / Gate H | Must close endpoint-to-gateway-to-endpoint without cloud dependency on the declared hardware. |
+| Robustness and fault injection | Complete; Parts 1 and 2 passed frozen-artifact integrity verification | `results/experiment6_part1/`, `results/experiment6_part2/` | Part 1 covers clean baseline, baseline wander, 50/60 Hz interference, and 20/10/5 dB muscle noise. Part 2 covers 0.5x/1.0x/2.0x amplitude scaling, one 50-sample loss interval per record, 5 ms timing jitter, and single-channel dropout. Amplitude scaling was invariant after per-window normalization; sample loss and 5 ms jitter had minimal pooled effect. Dropping channel 2 gave automatic PVC F1 0.8377 versus clean 0.8473; dropping channel 1 prevented the fixed channel-1 causal detector from producing eligible classifier events. The frozen system therefore requires channel-1 continuity or an explicit quality/reacquisition fallback. No model, detector, threshold, calibration, quantization, preprocessing, lead profile, or seed selection followed. |
+| Software runtime and local-loop benchmark | Complete; MQTT v5 loopback | `results/experiment7/summary.json`, `results/experiment7/protocol.json` | 1,020 windows and 30 sessions; p95 neural inference 0.4976 ms and p95 logical acquisition-to-local-decision 423.79 ms; software-runtime evidence only. |
+| Software-only local orchestration and feedback benchmark | Complete; MQTT v5 loopback | `results/experiment8a/summary.json`, `results/experiment8a/protocol.json` | 1,200 baseline windows across 30 sessions; loss/outage recovery, audit, restart, mismatch, and Internet-outage scenarios completed; software-simulation evidence only. |
+| Post-Gate-V real ECG replay strengthening | Complete; exploratory and non-gating | `results/experiment8a_real_replay/` | Ten fixed MIT-BIH/INCART fragments, 300 windows, and 10 sessions passed local MQTT v5 replay; all windows were acknowledged and accepted-event audit completeness was 100%. The gateway field is a packet-local peak proxy, not the Experiment 5 causal detector; no physical or clinical claim follows. |
+| Causal-detector-to-MQTT replay bridge | Complete; registered exploratory software run; linked-event criteria passed with fragment coverage limit | `results/experiment8a_causal_bridge/protocol.json`, `results/experiment8a_causal_bridge/summary.json`, `results/experiment8a_causal_bridge/per_fragment.json`, `results/experiment8a_causal_bridge/events.csv`, `results/experiment8a_causal_bridge/report.md` | On ten fixed clean development fragments, 500/500 MQTT raw packets arrived and 233/233 eligible causal-peak events from eight fragments had action, terminal ACK, and complete audit lineage. INCART I03/I04 produced zero detector peaks/events. Complete-fragment resampling preceded MQTT, and repeated-prefix adapter runtime is not Experiment 7 latency. Gate S2, Gate V, and external results are unchanged. |
+| Channel-1-loss service diagnostic | Complete; no-event reacquisition fallback **not demonstrated** | `results/experiment8a_causal_bridge/per_fragment.json`, `results/experiment8a_causal_bridge/report.md` | Fixed 10–15 s channel-1 zeroing on MIT-BIH 100 and INCART I01 reduced eligible events 28→22 and 38→31. Both interruption intervals had zero eligible events and zero reason-coded reacquire ACKs. Report this as the current service limitation; do not change frozen policy or detector to obtain a pass. |
+| Cross-layer error attribution synthesis | Complete; analysis of existing evidence, not a new model experiment | `results/cross_layer_attribution/` | Six layers are reported with layer-specific denominators and source hashes. The result is an error-attribution framework, not an additive error budget. |
+| Literature novelty matrix and manuscript synthesis | Targeted primary-source and magazine-style checks complete; bilingual drafts and four evidence-linked figures incorporate the bridge result and its limits; final review open | `docs/literature-matrix.md`, `docs/iotm-style-benchmark.md`, `manuscript/draft.md`, `manuscript/draft.zh-CN.md`, `manuscript/figures/` | Twelve working references have read-scope and claim boundaries. Both drafts distinguish the primary packet-local-proxy benchmark from the exploratory causal bridge, including two zero-event fragments and the missing channel-loss feedback. Four figure artworks and two tables are allocated; complete citation/metadata audit and internal review remain pending. |
+| Hardware deployment extension | Not applicable to current scope | Future work only | Physical endpoint, hardware gateway, energy, and wearable measurements are outside the current study. |
 
 ### Verified Historical Results
 
@@ -124,13 +144,13 @@ The exploratory streaming experiment showed a major oracle-to-automatic gap. On 
 
 ### Primary Research Question
 
-**Under heterogeneous ECG domains and edge-resource constraints, can an ECG acquisition endpoint plus local edge gateway form a multi-source-trained and auditable PVC risk service loop that satisfies predefined clinical-detection and IoT service-quality requirements without cloud-dependent inference?**
+**Under heterogeneous ECG domains and edge-resource constraints, can a software-simulated ECG acquisition endpoint and local gateway form an auditable, recoverable, low-latency, and measurable non-diagnostic PVC-risk service loop without cloud-dependent inference?**
 
 ### Sub-Questions
 
 1. Does adding INCART and LTDDB to MIT-BIH training improve record-level development performance and frozen cross-database generalization without allowing long records or one source to dominate learning?
 2. How much performance is lost when the final classifier is driven by causal automatic R peaks and realistic signal disturbances rather than reference annotations?
-3. Can the complete acquisition-endpoint-to-local-gateway-to-endpoint loop meet predefined latency, local-link reliability, false-escalation, resource, and auditability requirements on declared hardware?
+3. Can a software-simulated acquisition-endpoint-to-local-gateway-to-endpoint loop meet predefined latency, local-transport reliability, false-escalation, resource, recovery, and auditability requirements without cloud dependency?
 
 All sub-questions inherit the same scope: adult public ECG databases, `N` versus `V` beat classification, fixed 360 Hz canonical gateway timing, fixed one- or two-channel model variants, a two-tier local-edge deployment, and non-diagnostic service escalation.
 
@@ -138,24 +158,39 @@ All sub-questions inherit the same scope: adult public ECG databases, `N` versus
 
 | Criterion | Score | Rationale |
 |---|---:|---|
-| Feasible | 4/5 | All five databases are local and audited; model code exists. Hardware and orchestration work remain. |
+| Feasible | 4/5 | All five databases are local and audited; model and software service-loop code exist. The remaining work is software benchmark and validation. |
 | Interesting | 4/5 | It addresses the gap between annotation-centered ECG classification and operational connected-health services. |
 | Novel | 3/5 | The integrated evidence design may be novel, but literature-level novelty requires a formal search before claiming it. |
 | Ethical | 4/5 | Public secondary data and non-diagnostic actions reduce risk; clinical claims and autonomous treatment are excluded. |
 | Relevant | 5/5 | Directly matches the CFP's edge, feedback-loop, reliability, and accountability themes. |
-| **Average** | **4.0/5** | Proceed, subject to literature and hardware gates. |
+| **Average** | **4.0/5** | Proceed, subject to literature and software-loop validation gates. |
 
 ## 5. Planned Contribution Claims
 
 These are hypotheses to be tested, not current findings.
 
-1. **Multi-source ECG interpretation:** a source-aware training protocol that standardizes timing and input channels while preserving database and record provenance.
-2. **Two-tier local-edge partitioning:** an explicit contract separates acquisition, timestamping, buffering, and transport at the ECG endpoint from interpretation, policy, audit, and acknowledgement at the local gateway.
-3. **End-to-end edge evaluation:** a PVC pipeline that measures endpoint acquisition/packetization, local transport, mandatory post-R acquisition delay, automatic R-peak error, gateway inference, policy execution, and acknowledgement separately.
-4. **Risk-aware local orchestration and accountable feedback:** the gateway converts calibrated beat-level predictions and signal quality into safe actions while retaining endpoint identity, model hash, threshold version, lead mapping, event identity, policy version, action state, and acknowledgement.
-5. **Joint clinical and IoT benchmarking:** evaluation combines PVC metrics with false escalations per hour, endpoint-to-gateway transport reliability, latency decomposition, gateway memory/model size, recovery behavior, and audit completeness.
+1. **Two-tier local-edge service-loop architecture:** an explicit responsibility contract separates sensing, timestamping, buffering, and transport at the simulated ECG endpoint from interpretation, policy, audit, and acknowledgement at the local gateway.
+2. **Versioned service contract and accountable orchestration:** events and actions retain endpoint/gateway identity, contract version, model hash, threshold, lead mapping, policy version, acknowledgement, reason code, and terminal state.
+3. **Closed-loop recovery validation:** bounded loss, duplicate and out-of-order delivery, outage, mismatch, saturation, and gateway restart are evaluated without Internet-dependent loop closure.
+4. **Multi-source PVC interpretation case:** the frozen M1/L2/P0/O1 int8 model and Experiments 0-6 provide the interpretation-component evidence rather than the paper's primary standalone contribution.
+5. **Joint clinical and service benchmarking:** evaluation combines PVC metrics with false escalations per hour, simulated transport reliability, software latency decomposition, bandwidth, process memory/model size, recovery behavior, and audit completeness.
 
 The paper must not claim novelty from using a 1D-CNN, Pan-Tompkins-style detection, resampling, Platt calibration, MQTT, or TFLite individually. The candidate novelty is the integrated, measurable, and auditable digital service loop and the evidence demonstrating its trade-offs.
+
+### Contribution-Scope Decision (2026-10-06)
+
+The paper's primary contribution order is now fixed as follows:
+
+1. Two-tier local-edge responsibility contract and versioned service event contract.
+2. Closed-loop recovery, acknowledgement, provenance, and auditability under controlled faults.
+3. A **cross-layer error-attribution framework** that places existing sensing, signal/window, interpretation, transport, orchestration, and feedback results in one analysis. This is not called a quantitative error budget unless compatible denominators and a valid aggregation rule are demonstrated.
+4. Joint clinical and service metrics using the frozen PVC interpretation component.
+
+The following are explicitly deferred and must not be presented as completed contributions:
+
+- `Evidence-Aware Policy`: retain frozen `policy-v1`; discuss multi-evidence policy as future work unless a separately registered post-Gate-V exploratory policy experiment is completed.
+- FHIR or full healthcare semantic interoperability: retain the internal versioned service contract and state FHIR as a limitation/future direction.
+- Formal verification: report tested operational invariants, not formal verification, unless a separate mechanical state-space or proof artifact is produced.
 
 ## 6. Methodology Blueprint
 
@@ -173,7 +208,7 @@ The paper must not claim novelty from using a 1D-CNN, Pan-Tompkins-style detecti
 - Known linked MIT-BIH records `201` and `202`: one split group.
 - Clinical metric aggregation: pooled beats and record-level macro results, with the macro result treated as primary for generalization.
 - Service metric aggregation: event, session/record, and fault-injection run.
-- Hardware metric aggregation: repeated inference or end-to-end loop runs after warm-up.
+- Software runtime metric aggregation: repeated inference or end-to-end loop runs after warm-up, with runtime and host configuration recorded.
 
 ### Validity Strategy
 
@@ -188,7 +223,7 @@ The paper must not claim novelty from using a 1D-CNN, Pan-Tompkins-style detecti
 | Seed luck | Three fixed training seeds per candidate condition |
 | Automatic R-peak coupling | Report oracle and automatic pipelines separately |
 | Desktop latency mislabeling | Separate acquisition/packetization, local transport, mandatory post-R wait, gateway preprocessing/R-peak, neural inference, policy, and acknowledgement latency |
-| Two-tier role ambiguity | Freeze acquisition-endpoint, local-link, and gateway responsibilities and identifiers before hardware benchmarking |
+| Two-tier role ambiguity | Freeze simulated endpoint, local transport, and gateway responsibilities and identifiers before software benchmarking |
 | Previously observed SVDB | Disclose as isolated external holdout, not pristine blind test |
 | Simulated service actions | Label them prototype/fault-injection results, not clinical deployment outcomes |
 
@@ -388,7 +423,7 @@ Evidence classification:
 Data boundary:
 
 - Use M1 development sources only: MIT-BIH plus INCART.
-- Start from L2 `(300, 2)` as the software-development lead profile. Its endpoint acquisition, transport, and gateway resource suitability are deferred to Gate H and may not be inferred from desktop timing.
+- Start from L2 `(300, 2)` as the software-frozen lead profile. Its simulated endpoint, local transport, and gateway-process resource behavior are evaluated in Experiments 7 and 8A; desktop measurements must be reported as software-runtime evidence, not physical device performance.
 - Reuse the reviewed Experiment 1/2 record groups and split hash `fb003bbd3dc2e4d81f47df732032403a12bc9782a7f76042fdfd59fed346c787`.
 - Do not enumerate, load, inspect, or derive any tuning information from SVDB or NSRDB.
 - Do not use post-RR, whole-record future statistics, future beats, or target-record labels as model inputs.
@@ -416,7 +451,7 @@ Prospective optimization targets:
 | PVC-free-record false-positive burden | No increase; preferred reduction >= 25% |
 | Full-integer int8 software artifact size | < 1 MiB before Gate S |
 | Float/int8 decision agreement | >= 99% before Gate S |
-| Declared local-gateway p95 neural inference | < 50 ms at Experiment 7 / Gate H |
+| Software-gateway p95 neural inference | < 50 ms at Experiment 7, with host/runtime configuration declared |
 
 Candidate ladder:
 
@@ -466,7 +501,7 @@ Nested protocol:
 Staged execution and stopping rule:
 
 1. **Stage A screening:** run all `O0-O3` candidates on all five folds with the canonical screening seed `20260803`.
-2. A candidate advances if it either satisfies every model-quality target or improves support-aware macro F1 by at least 0.02 versus `O0`, loses no more than 0.01 recall, reduces neither source-specific macro F1 by more than 0.01, and passes the software architecture cap. The Stage A `resource_screen_pass` field is only a parameter-count proxy; it is not evidence of int8 conversion or target-hardware performance.
+2. A candidate advances if it either satisfies every model-quality target or improves support-aware macro F1 by at least 0.02 versus `O0`, loses no more than 0.01 recall, reduces neither source-specific macro F1 by more than 0.01, and passes the software architecture cap. The Stage A `resource_screen_pass` field is only a parameter-count proxy; it is not evidence of int8 conversion or the Experiment 7 software-runtime benchmark.
 3. **Stage B confirmation:** advancing candidates run the remaining two fixed seeds, yielding five folds by three seeds for every confirmed candidate.
 4. Select by the mean across all three seeds and paired per-record evidence. Do not select the best seed.
 5. The primary ladder stops after `O3`. If no candidate passes, exactly one preregistered backup is permitted: a training-only source/record-adversarial representation head with no added inference branch.
@@ -478,7 +513,7 @@ Post-selection requirements:
 - Revalidate M0/M1/M2 and L1/L2 under the winning architecture and training protocol before claiming that the software-frozen model, rather than the historical baseline, supports those selections.
 - Train one canonical final model on all M1 development records with the preregistered seed `20260803` and the median inner-selected epoch count. Fit Platt calibration and one global threshold only from its five-fold development OOF predictions.
 - Export full-integer int8 TFLite from development-only representative samples, verify float/int8 agreement, and save weights, calibration parameters, threshold, dependency versions, code hashes, and model hashes under Gate S.
-- Freeze one software architecture, source condition, lead profile, seed policy, calibration method, threshold, int8 artifact, and manifest before Experiment 3. Gateway and transport evidence are deferred to Gate H.
+- Freeze one software architecture, source condition, lead profile, seed policy, calibration method, threshold, int8 artifact, and manifest before Experiment 3. Software gateway and simulated transport evidence are evaluated in Experiments 7 and 8A under Gate V.
 
 Planned outputs:
 
@@ -583,7 +618,7 @@ Stage A outcome — complete negative result:
 
 Gate S occurs after Experiment 2.6 and final-architecture M0/M1/M2 and L1/L2 revalidation, before any final SVDB access. The selected candidate, or O1 if P0-P3 do not improve it, must be trained on all M1 development records with seed `20260803` and the median inner-selected epoch count. Its Platt calibration and global threshold must be fitted from five-fold OOF development predictions only.
 
-Gate S requires a float Keras artifact, a full-integer int8 TFLite artifact, representative quantization samples from development data only, calibration parameters, threshold, model/code/split/dependency hashes, and an immutable manifest. Full-int8 size must be below 1 MiB; float/int8 decision agreement must be at least 99%, mean absolute calibrated-probability error at most 0.02, 99th-percentile absolute error at most 0.05, and support-aware F1 and recall loss at most 0.01 on the held development equivalence set. Gateway latency, memory, endpoint transport, and energy values remain `pending_experiment7` until Gate H.
+Gate S requires a float Keras artifact, a full-integer int8 TFLite artifact, representative quantization samples from development data only, calibration parameters, threshold, model/code/split/dependency hashes, and an immutable manifest. Full-int8 size must be below 1 MiB; float/int8 decision agreement must be at least 99%, mean absolute calibrated-probability error at most 0.02, 99th-percentile absolute error at most 0.05, and support-aware F1 and recall loss at most 0.01 on the held development equivalence set. Software runtime, simulated transport, and process-memory values are measured later in Experiments 7 and 8A; no physical hardware inference follows.
 
 ### Experiment 3: Frozen SVDB Cross-Database Evaluation
 
@@ -592,7 +627,7 @@ Entry gate:
 - Experiment 2.5 and the bounded Experiment 2.6 ladder are complete, with all unmet targets retained in the report.
 - Gate S records the final development-only model-selection decision and the final-architecture M0/M1/M2 and L1/L2 revalidation status.
 - Architecture, training sources, weights, seed policy, calibration, threshold, lead mapping, resampling, float artifact, int8 artifact, and manifest hashes are frozen.
-- Declared endpoint, transport, and gateway hardware are not required for Gate S and remain pending Gate H.
+- Physical endpoint, transport, and gateway hardware are not required for Gate S or Gate V and remain outside the current study scope.
 
 SVDB must be evaluated without retraining, threshold changes, quantization changes, lead-profile changes, or selecting among seeds from SVDB performance.
 
@@ -650,33 +685,34 @@ Conditions:
 
 Report degradation curves for R-peak F1, PVC F1, recall, false escalations per hour, and latency. Every synthetic perturbation must record its generation parameters and random seed.
 
-### Experiment 7: Two-Tier Edge Deployment Benchmark
+### Experiment 7: Software Runtime and Local-Loop Benchmark
 
-Experiment 7 is intentionally scheduled after Gate S, Experiments 3-6, and Experiment 8A. It is the first mandatory Gate H measurement. The acquisition endpoint, local transport profile, and local edge gateway must all be declared before Gate H. A Raspberry Pi-class Linux gateway is acceptable for a multi-channel bedside or portable monitor. The acquisition endpoint may initially be a reproducible replay fixture, but physical acquisition claims require a declared ECG front end or acquisition device. An MCU benchmark is optional unless the paper claims MCU or wearable suitability.
+Experiment 7 is scheduled after Gate S, Experiments 3-6, and Experiment 8A. It measures the software runtime of the two logical tiers on a declared development host. The endpoint is a replay process, the local transport is a loopback MQTT v5 or deterministic in-process adapter, and the gateway is a local process. This is software-runtime evidence and is not a physical device benchmark.
 
 Procedure:
 
-1. Record the acquisition endpoint or replay-fixture identity, local transport profile, gateway hardware/OS/runtime, connection parameters, queue capacity, and clock-synchronization method.
-2. Export the selected model to full-integer int8 TFLite and verify float-versus-int8 prediction agreement on a held development subset.
-3. Warm up the gateway runtime.
-4. Run at least 1,000 inference windows on the gateway and at least 30 complete endpoint-to-gateway-to-endpoint sessions.
-5. Measure p50, p95, p99, and maximum latency separately for endpoint acquisition/packetization, local transport, mandatory post-R wait, gateway preprocessing/R-peak, neural inference, policy execution, and acknowledgement.
-6. Measure model size, gateway peak resident memory, CPU load, endpoint/gateway packet counts, retries, sequence gaps, duplicates, and buffer occupancy.
-7. Repeat the local-link screen under the bounded outage and packet-loss conditions later used in Experiment 8.
-8. Measure endpoint or gateway energy only if a reproducible instrument is available; otherwise do not estimate it.
+1. Record the replay-endpoint identity, simulated transport profile, host OS/runtime, queue capacity, and logical clock method.
+2. Verify the frozen full-integer int8 artifact, calibration, threshold, model hash, and policy version; do not refit them.
+3. Warm up the gateway process and record the runtime version.
+4. Run at least 1,000 inference windows and at least 30 complete simulated endpoint-to-gateway-to-endpoint sessions.
+5. Measure p50, p95, p99, and maximum latency separately for simulated endpoint packetization, simulated local transport, mandatory post-R wait, gateway preprocessing/R-peak, neural inference, policy execution, and acknowledgement.
+6. Measure model size, process peak resident memory, CPU load, message throughput, retries, sequence gaps, duplicates, and simulated buffer occupancy.
+7. Repeat the same bounded loss, outage, duplicate, reorder, and restart conditions used in Experiment 8A.
+8. Do not estimate energy or physical acquisition performance.
 
 Targets:
 
 - Int8 model size below 1 MiB.
-- p95 neural inference below 50 ms on the declared local gateway.
-- p95 acquisition-to-local-decision latency below 600 ms, including local transport and the 416.7 ms post-R acquisition wait.
+- p95 software-gateway neural inference below 50 ms on the declared host/runtime.
+- p95 simulated acquisition-to-local-decision latency below 600 ms, including the 416.7 ms post-R acquisition wait.
 - Every accepted session has traceable endpoint, transport, gateway, model, policy, action, and acknowledgement provenance.
-- No claim of MCU suitability without an MCU measurement.
-- No claim of physical ECG acquisition latency or energy when the endpoint is a replay fixture.
+- All reported latency and resource values are labelled software-runtime measurements.
 
-### Experiment 8A: Software-Only Local Digital Service Loop and Fault Injection
+### Experiment 8A: Primary Software-Only Local Digital Service Loop and Fault Injection
 
-Objective: validate the endpoint-to-gateway message contract, local gateway inference and policy implementation, fault recovery, acknowledgement, and auditability before hardware is available. It runs an explicitly simulated replay endpoint, local MQTT v5 transport, and a gateway process on the development computer. It must be labelled software-only simulated service-loop evidence and cannot support physical acquisition, hardware latency, energy, wearable, or deployment claims.
+Objective: validate the simulated endpoint-to-gateway message contract, local gateway inference and policy implementation, fault recovery, acknowledgement, and auditability. It runs an explicitly simulated replay endpoint, a local MQTT v5 loopback transport for the primary benchmark, deterministic in-process transport for unit tests, and a gateway process on the development computer. It must be labelled software-only simulated service-loop evidence and cannot support physical acquisition, hardware latency, energy, wearable, or deployment claims.
+
+The minimum prototype below records the original design target. The completed 8A gateway actually forms the latest 300-sample packet window and uses a packet-local maximum-amplitude peak proxy; its `r_peak_source` metadata must not be cited as proof that the Experiment 5 causal detector ran in the MQTT loop. Section 13B registers the bounded attempt to close this evidence gap.
 
 Minimum prototype:
 
@@ -719,15 +755,13 @@ Service targets:
 - All rejected events retain a reason code.
 - Safety fallback is local monitoring or reacquisition, never silent escalation failure.
 - Internet loss does not prevent local monitoring, reacquisition, inference, policy execution, acknowledgement, or audit logging.
-### Experiment 8B: Declared-Hardware Local Loop Confirmation
+### Experiment 8B: Hardware Extension (Out of Scope)
 
-Objective: repeat the fixed Experiment 8A scenarios on the Experiment 7 endpoint, transport, and gateway identities. Experiment 8B is required for Gate H and for any claim that the measured two-tier local-edge loop closes without cloud dependency.
+Experiment 8B is not part of the advisor-approved software-only study and is not required for paper completion or Gate V. A future project may repeat the frozen Experiment 8A scenarios on declared ECG acquisition and gateway hardware, but those results must be registered separately and cannot be inferred from the current software evidence.
 
-All 8A fault scenarios, action semantics, model hash, policy version, queue capacities, and audit fields are frozen before 8B. Hardware-specific measurements must report endpoint-to-gateway-to-endpoint acknowledgement latency, recovery time, duplicate-action rate, permanent event loss after bounded outage, resource use, and audit completeness separately from the software-only simulation.
+### Software-only execution order
 
-### Deferred-hardware execution order
-
-`Experiment 2.5 -> Experiment 2.6 -> Gate S -> Experiment 3 -> Experiment 4 -> Experiment 5 -> Experiment 6 -> Experiment 8A -> Experiment 7 -> Gate H -> Experiment 8B`
+`Experiment 2.5 -> Experiment 2.6 -> Gate S -> Experiment 3 -> Experiment 4 -> Experiment 5 -> Experiment 6 -> Experiment 8A -> Experiment 7 -> Gate V`
 
 ## 10. Statistical Analysis Plan
 
@@ -755,9 +789,9 @@ Before Experiment 3, create one immutable manifest containing:
 - Training database names and record IDs.
 - Record split groups and split hash.
 - Lead profile and fallback records.
-- Acquisition endpoint hardware/firmware or replay-fixture identity and simulation status.
-- Frozen local transport profile, connection parameters, queue capacities, and clock-synchronization method.
-- Local gateway hardware, operating system, runtime, and power mode.
+- Replay-fixture identity and explicit simulation status.
+- Frozen simulated local transport profile, connection parameters, queue capacities, and logical clock method.
+- Local gateway process, operating system, runtime, and host execution mode.
 - Source and target sample rates.
 - Window and normalization contract.
 - Model architecture and parameter count.
@@ -779,36 +813,29 @@ If any field changes, issue a new manifest version. Do not overwrite the frozen 
 
 ### One-Sentence Positioning
 
-This work studies how a multi-source ECG interpretation model can be embedded in an event-driven and auditable two-tier local-edge service loop formed by an ECG acquisition endpoint and local gateway, and evaluates the complete chain under cross-database, signal, local-link, and resource disturbances.
+This work studies whether an event-driven and auditable two-tier local-edge service loop, formed by a simulated ECG acquisition endpoint and local gateway process, can close sensing-to-feedback reliably without cloud-dependent inference; a frozen multi-source PVC model serves as its interpretation use case.
 
 ### Paper Structure
 
 1. Connected-health fragmentation and the need for verifiable service loops.
 2. Related work: ECG/PVC edge inference, connected-health orchestration, reliability, and provenance.
-3. Proposed ECG acquisition-endpoint plus local-gateway architecture, partition contract, and event schema.
-4. Multi-source ECG methodology and leakage controls.
-5. Acquisition endpoint, local transport, gateway inference, and service-loop implementation.
-6. Clinical, cross-database, resource, and fault-injection results.
+3. Proposed ECG acquisition-endpoint plus local-gateway architecture, versioned service contract, event schema, and governance boundary.
+4. Event-driven orchestration, acknowledgement, audit, and recovery implementation.
+5. Frozen multi-source PVC interpretation component, data roles, and leakage controls.
+6. Service-loop, clinical, cross-database, resource, and fault-injection results.
 7. Discussion: accuracy/latency/reliability trade-offs, limitations, and deployment implications.
 8. Conclusion focused on measurable service behavior, not only classifier accuracy.
 
-### Required Figures
+### Magazine Figure and Table Budget
 
-1. Two-tier endpoint-to-gateway sensing, interpretation, decision, action, acknowledgement, and feedback architecture.
-2. Local service-loop state machine including endpoint buffering, retry, gateway reacquisition acknowledgement, and optional human-review branches.
-3. Data-role and leakage-control diagram.
-4. M0/M1/M2 and L1/L2 development results with confidence intervals.
-5. SVDB/NSRDB oracle-versus-automatic performance.
-6. Endpoint acquisition/packetization, local transport, post-R wait, gateway processing/inference/policy, and acknowledgement latency decomposition with hardware resource profiles.
-7. Robustness and service fault-recovery curves.
+Reserve **four figures and two tables** for the submitted article, with each item readable at magazine size. This is a ceiling and allocation, not a requirement to include an unsupported result. Detailed ablations, data contracts, and extra robustness plots remain in traceable supporting material instead of being squeezed into composite figures.
 
-### Required Tables
-
-1. Dataset, sampling-rate, channel, role, and label summary.
-2. Model variants and parameter/resource costs.
-3. Frozen external-test clinical metrics.
-4. Endpoint-to-gateway reliability, false escalation, latency, local-loop recovery, and auditability metrics.
-5. Limitations and corresponding mitigations.
+1. Figure 1: two-tier architecture and the sensing-to-acknowledgement service lifecycle, including local-only loop closure and optional remote review.
+2. Figure 2: automatic-versus-reference R-peak consequences and the denominator-aware ECG-side error attribution; do not add service-event percentages to beat percentages.
+3. Figure 3: bounded loss/outage/restart recovery and action/acknowledgement outcomes, labelled as synthetic fault injection.
+4. Figure 4: Experiment 7 logical acquisition-to-decision latency components, separating the fixed 416.7 ms post-R window wait from software processing and transport; report the p95 total separately from additive mean stages.
+5. Table 1: frozen interpretation component, data roles, and external/automatic-pipeline results with their distinct evaluation populations.
+6. Table 2: service reliability, audit completeness, false escalation, software resource use, and claim boundaries; report record-level NSRDB limitations.
 
 ## 13. Literature Work Required Before Novelty Claims
 
@@ -819,7 +846,116 @@ Conduct a focused literature review in four streams:
 3. Two-tier edge/gateway digital service loops and event-driven local orchestration in connected healthcare.
 4. Provenance, reliability, fault recovery, and human-in-the-loop escalation for medical IoT.
 
-For each candidate paper, extract WHY, HOW, WHAT, data, hardware, loop stages implemented, metrics, and unresolved gaps. Do not claim "first," "novel," or "state of the art" until the search and citation verification are complete.
+For each candidate paper, extract WHY, HOW, WHAT, data, hardware, loop stages implemented, metrics, and unresolved gaps. Record the read scope (full text, methods, or abstract only), DOI/source URL, and exactly which manuscript claim it supports. If only the abstract is available, mark unassessed methods as unassessed. Do not claim "first," "novel," or "state of the art" from a targeted search.
+
+Start the targeted verification on **9 October 2026**, alongside rewriting the English introduction, related work, and architecture sections. Prioritize closest ECG service-loop or cloud-edge systems, MQTT ECG alert systems, signal-quality/false-alarm control, multi-database PVC classification, and fault-tolerant medical IoT. Check the existing matrix against primary sources, then add the missing service-level comparators. Select approximately 12-15 fully checked references for the submitted paper; the matrix may contain more screening candidates than the final reference list. Distinguish prior capabilities from this project's measured combination rather than stitching an untested feature into the claimed contribution.
+
+## 13A. Post-Gate-V Convergence Protocol
+
+Gate V is already passed. The remaining work strengthens and interprets the
+evidence; it does not reopen Gate S2, the frozen external evaluations, or the
+model/threshold/policy selection process.
+
+### Real ECG Replay Strengthening Experiment
+
+- Use fixed, locally available MIT-BIH and INCART fragments only; record IDs,
+  fragment boundaries, channel mapping, source hashes, and replay seed must be
+  written to a protocol before execution.
+- Replay at least 10 fixed record fragments, at least 300 windows, and at least
+  10 sessions through the existing simulated endpoint -> local MQTT v5 QoS 1 ->
+  gateway path.
+- Reuse the Gate S2 model hash, calibration, threshold `0.49`, L2 lead profile,
+  `policy-v1`, service-contract version, and gateway runtime unchanged.
+- Record window formation, automatic R-peak status, signal quality, requested
+  action, ACK/terminal status, latency, and accepted/rejected audit completeness.
+- Classify the result as post-Gate-V exploratory strengthening evidence. It may
+  support a real-data replay claim, but it cannot modify Gate V or any frozen
+  clinical/external result.
+- The experiment must not be described as physical acquisition, hardware
+  latency, energy, wearable, clinical-efficacy, or regulatory evidence.
+
+### Cross-Layer Error Attribution
+
+Create `results/cross_layer_attribution/` with a protocol, source-artifact
+manifest, layer table, and figure. At minimum report:
+
+- sensing: missed automatic R peaks and unmatched alarms;
+- signal/window: window mislocalization and ineligible windows;
+- interpretation: classifier or causal-RR errors;
+- transport: loss, duplicate, reorder, outage, and recovery outcomes;
+- orchestration: malformed/stale/hash-mismatch rejection and buffer saturation;
+- feedback: ACK timeout/failure, restart recovery, and terminal-status outcomes.
+
+Each layer must retain its own denominator, numerator, confidence or interval
+method where applicable, and downstream impact. Do not sum percentages across
+layers that represent different units. The paper may call this a
+cross-layer error-attribution framework; the term `error budget` is reserved
+for a future analysis with a defensible common denominator and aggregation rule.
+
+### Evidence and Bandwidth Boundaries
+
+- The current Experiment 8A baseline uses synthetic ECG samples for service
+  fault testing. This fact must be stated wherever those results are used.
+- The MQTT/JSON byte count is a protocol-overhead measurement. The current
+  result is larger than a same-size two-channel 16-bit raw reference, so the
+  paper must not claim bandwidth savings without a separately registered
+  binary/compression comparison.
+- Existing Gate V acceptance checks remain valid, but a real-ECG replay result
+  is additive context and not a replacement for the registered Gate V artifact.
+
+### Claim-to-Evidence Register
+
+Until a new protocol explicitly supersedes it, the paper's service-loop claims
+must use this exact frozen configuration:
+
+| Item | Frozen value | Evidence |
+|---|---|---|
+| Model | Gate S2 M1/L2/P0/O1 full-int8; SHA-256 `edea13aacdd5f6f9f94a3b73092f567f25b4dcade6133da4af7eb42aa2913776` | `results/gate_s2_int8_tf215_run1/manifest.json` |
+| Calibration/threshold | Fixed calibration; threshold `0.49` | `results/gate_s2_int8_tf215_run1/int8_direct_evaluation.json` |
+| Policy | `policy-v1` | `src/service_loop/gateway_policy.py`, `docs/service-loop-governance.md` |
+| Service contract | `ecg-service-contract-v1` | `src/service_loop/contracts.py` |
+| Primary transport | Local MQTT v5 QoS 1 | `results/experiment7/protocol.json`, `results/experiment8a/protocol.json` |
+| Gate V decision | Passed software-simulated validation | `results/gate_v/decision.json` |
+
+Numerical claims about model quality, automatic R-peak degradation, runtime,
+fault recovery, auditability, or bandwidth must link to a result artifact. A
+literature claim must link to a verified source in the literature matrix. A
+recommendation or hypothesis must be labelled as such and must not be written as
+a finding.
+
+## 13B. Time-Boxed Causal-Detector Service-Loop Bridge
+
+The completed Experiment 8A and post-Gate-V replay used synthetic packet-centred
+traffic and a packet-local peak proxy, respectively. Neither establishes that
+the Experiment 5 causal detector drove the MQTT service loop. Register this
+one bounded exploratory bridge before execution; it does not reopen Gate S2,
+Gate V, the frozen external evaluations, or the model-selection process.
+
+### Fixed Inputs and Configuration
+
+- Reuse the ten named MIT-BIH/INCART record fragments, start samples, lead mappings, source hashes, and frozen record order from `results/experiment8a_real_replay/protocol.json`. These are development-source inputs for link-level validation, not a new external clinical test.
+- Register `results/experiment8a_causal_bridge/protocol.json` before running. Record code commit or source hashes, packet/chunk size, clock method, fragment boundaries, detector state handling, expected output schema, and the fixed 150-sample post-R wait. Keep failed attempts and their reason codes.
+- Reuse the Gate S2 int8 model hash, calibration, threshold `0.49`, L2 lead profile, `policy-v1`, `ecg-service-contract-v1`, and local MQTT v5 QoS 1. No source, model, detector, threshold, quality cutoff, policy, or seed may be chosen based on the bridge outcomes.
+- Preserve chronological sample sequence through the simulated endpoint. Run the **unchanged Experiment 5 causal R-peak detector at the gateway** on the canonical two-channel replay, with detector state reset only at each fixed record boundary; form a 300-sample window only after its post-R samples are available, and carry the detected peak sample and emission sample into a companion event trace without changing the frozen service-event schema. If canonical resampling is done before MQTT transmission, label that preprocessing explicitly; do not claim a fully causal native-rate acquisition pipeline.
+- A bounded adapter may retain the received sample prefix and call the existing detector on that prefix, emitting only newly available peaks whose `emitted_sample` is at or before the current prefix end. This keeps the detector implementation unchanged; record the repeated-computation cost separately and do not reuse Experiment 7 latency numbers as measurements of this adapter. Use the Experiment 5 causal RR feature and per-window normalization contracts, not the 8A packet-local proxy features.
+- Use event identifiers tied to source record and detected peak. The local gateway must apply the frozen inference and policy, return an acknowledgement, and retain the event/action/terminal audit record. Do not count packet receipt as a completed service action.
+
+### Measurements and Acceptance
+
+- Save a per-event trace with record and source hashes, endpoint sample range, detected R-peak sample, peak emission sample, window eligibility, frozen model probability, signal quality, decision threshold, requested action, acknowledgement, terminal status, reason code, and audit identifier. Also save per-fragment counts of transmitted packets, detector peaks, eligible windows, accepted/rejected events, and missing acknowledgements.
+- Compare the causal detector's peak locations on these same fixed fragments with the Experiment 5 implementation using the registered 150 ms match tolerance. Explain any mismatch before claiming a linked detector-to-service result. Report window-formation rate with its denominator and reason-coded exclusions.
+- The bridge supports a linked software-replay claim only if every reported eligible event has traceable peak-to-action-to-terminal-ack lineage, accepted-event audit fields are complete, rejected attempts have reason codes, the frozen configuration hashes match, and no unresolved transport callback error remains. Report observed rates and failures even when these criteria fail. Do not infer a new clinical F1 from this development-only sample.
+- Complete or close the attempt by **15 October 2026**. If incomplete or failed, retain the protocol and failure evidence, keep the Experiment 5 detector and existing packet-local-proxy replay as separate evidence, and remove wording that presents them as one validated automatic-detection service path. Do not extend the attempt by reopening frozen design choices.
+
+### Channel-1-Loss Diagnostic
+
+- In the same registered bridge, separately use fixed MIT-BIH `100` and INCART `I01` fragments. Inject one five-second channel-1 interruption from replay seconds 10 through 15 in each; retain channel 2, packet order, endpoint IDs, model, and policy unchanged. Record this fixed interval in the protocol before execution.
+- Compare the clean and interrupted runs for packet acceptance, quality status, detected peaks, window formation, requested actions, reason codes, reacquire acknowledgements, and terminal audit entries.
+- Determine whether the **existing** service path issues a reason-coded `reacquire` acknowledgement when no eligible detector event is formed. If it cannot, state this as an observed service limitation; do not create a new policy version or retrofit the frozen Gate V result to turn the diagnostic into a pass.
+
+### Registered Outcome (9 October 2026)
+
+`results/experiment8a_causal_bridge/protocol.json` was written before execution and records source/code hashes, all ten fixed fragments, the 180-sample MQTT chunk, the gateway prefix adapter, and the two fixed channel-1 interruptions. The unchanged detector formed 233 eligible service events from eight of ten clean fragments; all 233 had a frozen-model decision, local action, terminal MQTT ACK, and complete audit lineage. INCART I03 and I04 had zero detector peaks. Both channel-1 interruptions produced zero eligible events and zero reason-coded reacquire ACKs inside the gap. The bridge supports a narrow linked **software-replay** claim for events that formed, but the no-event reacquisition fallback failed this diagnostic. See `results/experiment8a_causal_bridge/report.md` for denominators and the pre-MQTT full-fragment resampling limit. Gate S2, Gate V, and frozen external results are unchanged.
 
 ## 14. Risk Register
 
@@ -829,11 +965,11 @@ For each candidate paper, extract WHY, HOW, WHAT, data, hardware, loop stages im
 | LTDDB dominates due to long recordings | High | Hierarchical source/record/class sampling and per-source reporting |
 | Two-channel semantics differ across databases | Medium | Fixed documented mappings; call it two-channel, not uniform lead-space fusion |
 | Upsampling 128 Hz appears misleading | Medium | State that it standardizes timing and adds no physiological information |
-| Automatic R-peak remains weak | High | Error decomposition; improve detector using development data only; preserve frozen classifier comparison |
-| Centered window imposes 416.7 ms delay | Medium | Report explicitly; test a causal shorter-post-window variant only as a preregistered ablation |
-| No declared acquisition endpoint, local transport, or gateway in time | Critical | Freeze all three deployment profiles before model freeze; label replay endpoints as simulated |
+| Automatic R-peak remains weak | High | Report the frozen Experiment 5 error decomposition and avoid post-freeze detector tuning |
+| Centered window imposes 416.7 ms delay | Medium | Separate the fixed post-R wait from processing and transport latency; do not relabel model inference time as full-loop latency |
+| No declared simulated endpoint, local transport, or gateway runtime in time | Critical | Freeze all three software profiles before Gate V; label replay endpoints and transport as simulated |
 | Service prototype remains a message demo | High | Demonstrate endpoint buffering, local transport faults, gateway policy execution, acknowledgement, recovery, and audit metrics |
-| Endpoint and gateway clocks are not comparable | High | Freeze a clock-synchronization or timestamp-correlation method and report its uncertainty |
+| Simulated endpoint and gateway clocks are not comparable | High | Freeze a logical clock or timestamp-correlation method and report its uncertainty |
 | Cloud scope returns through implementation convenience | Medium | Keep cloud inference/orchestration outside the critical loop; isolate optional remote-review egress and test local operation during Internet outage |
 | CFP mismatch from classifier-centric writing | Critical | Make service loop the title, architecture, evaluation unit, and discussion center |
 | SVDB previously viewed | Medium | Disclose; freeze protocol and avoid "blind test" wording |
@@ -841,27 +977,36 @@ For each candidate paper, extract WHY, HOW, WHAT, data, hardware, loop stages im
 | Optimization overfits the reused development folds | High | Predeclare O0-O3, use one screening rule, confirm with all three seeds, allow only one backup, and rely on frozen SVDB for external evidence |
 | Metric definition appears changed to improve scores | High | Report support-aware and legacy zero-filled macro F1 together; disclose the pre-external timing and evaluate PVC-free records with false-alarm metrics |
 | Optimized architecture reverses M1 or L2 conclusions | High | Revalidate M0/M1/M2 and L1/L2 under the winning protocol before final selection claims |
+| Synthetic 8A traffic is overinterpreted as real ECG service evidence | High | Run the fixed post-Gate-V real ECG replay strengthening experiment and label synthetic versus real replay results separately |
+| Packet-local peak proxy is described as the Experiment 5 causal detector | Critical | Run the registered, time-boxed 8A causal bridge or explicitly keep their results separate in the paper |
+| Channel-1 dropout silently prevents an eligible event and reacquisition | High | Run the fixed two-record dropout diagnostic; disclose a missing reason-coded ACK as a service limitation without changing frozen policy-v1 |
+| Cross-layer failure rates are incorrectly added across incompatible units | High | Preserve layer-specific denominators and call the result error attribution, not an additive error budget |
+| Protocol overhead is mistaken for bandwidth efficiency | Medium | Report JSON/MQTT bytes and raw-reference comparison as overhead; do not claim savings without a registered binary/compression study |
+| New policy or interoperability work destabilizes the frozen study | High | Keep policy-v1, internal service contract, Gate V, and external results fixed; defer Evidence-Aware Policy and FHIR |
+| Manuscript exceeds magazine format limits | High | Draft to at most 4,500 main-text words, six figures/tables combined, and 15 verified references; audit the limits before submission |
 | Schedule compression | High | Use hard weekly gates and stop low-value architecture exploration |
 
 ## 15. Timeline to Submission
 
 | Date | Gate | Required Deliverable |
 |---|---|---|
-| 2-3 Aug 2026 | Development evidence | Experiments 0-2 artifacts reviewed; M1 selected and L2 development-preferred pending hardware evidence |
+| 2-3 Aug 2026 | Development evidence | Experiments 0-2 artifacts reviewed; M1 selected and L2 development-preferred pending software-loop evidence |
 | 4-15 Aug | Experiment 2.5 optimization | O0-O3 Stage A, advancing-candidate Stage B, support-aware metrics, and int8 resource screening |
-| 16-23 Aug | Final ablation validation | COMPLETE: P0/O1 M0/M1/M2 and L1/L2 revalidation; declared endpoint/local-link/gateway screen remains pending |
+| 16-23 Aug | Final ablation validation | COMPLETE: P0/O1 M0/M1/M2 and L1/L2 revalidation; software endpoint/transport/gateway screen remains pending |
 | 24-27 Aug | Model-selection gate | Experiment 2.5 decision, all unmet targets retained, final source/lead/seed policy selected |
 | 28-31 Aug | Model freeze | COMPLETE: original Gate S attempts failed their immutable pointwise p99 criterion; the explicitly versioned Gate S2 deployment-probability amendment passed under TensorFlow 2.15.1. P0/O1/M1/L2 and the Gate S2 int8 artifact are software-frozen; external evaluation is unlocked. |
 | 1-8 Sep | External evaluation | Experiments 3 (SVDB) and 4 (NSRDB) reports complete |
-| 9-16 Sep | Operational ECG pipeline | COMPLETE: final automatic R-peak report; Experiment 6 robustness remains pending |
-| 17-27 Sep | Two-tier edge deployment | Int8 gateway model plus acquisition-endpoint, local-link, gateway, and acknowledgement benchmark |
-| 28 Sep-7 Oct | Service loop | Orchestrator, acknowledgement, audit, and fault-injection results |
-| 8-14 Oct | Literature and synthesis freeze | Verified related-work matrix and finalized contribution claims |
-| 15-21 Oct | Manuscript draft | Complete figures, tables, and first draft |
-| 22-26 Oct | Internal review | Methodology, integrity, CFP-scope, and reproducibility review |
-| 27-29 Oct | Revision | Final manuscript and supplementary artifacts |
-| 30 Oct | Submission freeze | No new experiments; package verification only |
-| 31 Oct | Deadline | Submit through IEEE Author Portal |
+| 9-16 Sep | Operational ECG pipeline | COMPLETE: final automatic R-peak report and Experiment 6 robustness/fault-injection results |
+| 17-27 Sep | Software runtime benchmark | Experiment 7 software gateway, simulated transport, latency, resource, and acknowledgement benchmark |
+| 28 Sep-7 Oct | Software service loop | Experiment 8A orchestrator, acknowledgement, audit, recovery, and fault-injection results; Gate V evidence |
+| 8-9 Oct | Existing convergence evidence | COMPLETE: real ECG packet-local-proxy replay, cross-layer attribution, claim-to-evidence boundary, and initial English draft exist |
+| 9-11 Oct | Writing and literature start | Verify CFP/author limits and closest primary sources; map each contribution to evidence, set the six-item figure/table budget and 12-15-source shortlist, complete a detailed English outline, and start Introduction, Related Work, and Architecture revisions |
+| 10-15 Oct | Bounded supporting experiment | COMPLETE 9 Oct: protocol was registered before the 8A causal bridge; the unchanged detector-to-MQTT trace and fixed two-record channel-1-loss diagnostic are in `results/experiment8a_causal_bridge/` |
+| 15 Oct | Evidence/claim decision | RESOLVED EARLY 9 Oct: use only the linked-event software-replay claim for 233 formed baseline events from eight fragments; report two zero-event fragments and the missing reacquire ACK during both channel-1 interruptions. No model, detector, threshold, or policy search follows |
+| 16-20 Oct | English first full version | Complete an accessible draft within 4,500 main-text words, using at most four figures, two tables, and 15 checked references; separate model, service, and software-runtime evidence |
+| 21-28 Oct | Internal review and revision | Review methodology, source and numerical claims, manuscript integrity, CFP fit, format, and reproducibility; revise every unsupported claim and figure/table |
+| 29-30 Oct | Submission freeze | No new exploratory experiments; confirm word/figure/reference counts, author and portal details, source links, declarations, and submission files |
+| 31 Oct | Deadline | Submit through the IEEE Author Portal under the correct special-issue article type |
 
 ## 16. Decision Gates
 
@@ -898,6 +1043,32 @@ The prototype must demonstrate every loop stage across the approved local archit
 - Every literature claim has a verified source.
 - Simulated service behavior is labeled simulated.
 - No clinical efficacy or regulatory claim exceeds the evidence.
+
+### Gate V: Software Loop Validation
+
+Gate V replaces the hardware-dependent Gate H for this research version. It
+requires completed Experiment 8A and Experiment 7 artifacts using the same
+frozen model, calibration, threshold, policy, event schema, simulated endpoint,
+and local transport profile. No physical endpoint, gateway, energy meter, or
+MCU is required.
+
+Gate V passes only when:
+
+- The simulated endpoint, local transport, and gateway process have explicit
+  responsibilities and stable identifiers.
+- Events carry endpoint identity, timestamps, monotonic sequence numbers,
+  model hash, policy version, action, acknowledgement, and terminal status.
+- Duplicate and out-of-order delivery is handled without duplicate service
+  actions; bounded loss and outage recover without permanent event loss within
+  declared queues.
+- Gateway restart recovers queued events and SQLite WAL audit state.
+- Accepted-event audit-field completeness is 100%, and every rejected event
+  retains a reason code.
+- The local loop continues without Internet or cloud availability.
+- Latency, CPU, memory, throughput, and recovery values are reported as
+  software-runtime measurements and all service behavior is labelled simulated.
+- No conclusion claims physical ECG acquisition, hardware latency, energy,
+  MCU suitability, or wearable deployment.
 
 ### Gate S2: Deployment-Probability Protocol Amendment (2026-08-08)
 
@@ -944,10 +1115,16 @@ paper must report both the original Gate S failure and the Gate S2 decision.
 4. **Complete: Experiment 3 frozen SVDB evaluation.** The passed Gate S2 full-int8 P0/O1/M1/L2 artifact, fixed Platt calibration, and threshold `0.49` were evaluated exactly once on all 78 SVDB records with oracle annotation windows. The result, per-record predictions, record-level bootstrap intervals, and integrity verification are in `results/experiment3/`. No retraining, calibration, threshold, quantization, lead-profile, preprocessing, seed, or model selection followed the result.
 5. **Complete: Experiment 4 NSRDB false-alarm evaluation.** The same passed Gate S2 full-int8 P0/O1/M1/L2 artifact, fixed Platt calibration, and threshold `0.49` were evaluated exactly once on all 18 NSRDB records. Overall policy-v1 false service escalation was `0.606/h`, but the record-bootstrap upper confidence limit was `1.638/h` and the worst record was `9.0/h`; preserve this record-level limitation. The result and integrity verification are in `results/experiment4/`. No retraining, calibration, threshold, quantization, lead-profile, preprocessing, seed, or model selection followed the result.
 6. **Complete: Experiment 5 automatic R-peak evaluation.** The frozen Gate S2 P0/O1/M1/L2 int8 artifact and threshold `0.49` were evaluated with the existing causal detector. The final report is `results/experiment5_retry2/`; no detector, model, calibration, threshold, preprocessing, lead, quantization, or seed selection followed.
-7. **Next gate:** execute Experiment 6 robustness and fault injection under the frozen model, threshold, and policy. Record failures without tuning the frozen classifier or external-test configuration.
-8. After Experiment 6, run the software-only Experiment 8A benchmark using the explicitly simulated replay endpoint and local MQTT v5 transport. Do not present 8A as physical deployment evidence.
-9. Freeze the declared endpoint, local transport, gateway, queue, and clock method before Experiment 7; repeat the fixed 8A scenarios as Experiment 8B on declared hardware for Gate H.
-10. Preserve the current `models/` contents as historical baselines until replacement artifacts are complete and verified.
+7. **Complete: Experiment 6 robustness and fault injection.** Part 1 and Part 2 are verified in `results/experiment6_part1/` and `results/experiment6_part2/`; no model, detector, calibration, threshold, quantization, preprocessing, lead-profile, or seed selection followed.
+8. **Complete: Experiment 8A.** The primary software-only local MQTT v5 loopback benchmark completed with the simulated replay endpoint and gateway process. Results are in `results/experiment8a/`; do not present them as physical deployment evidence.
+9. **Complete: Experiment 7 and Gate V.** The matching software runtime benchmark is in `results/experiment7/`, and `results/gate_v/decision.json` records a passed Gate V. Do not create a hardware Gate H requirement.
+10. **Complete:** post-Gate-V real ECG replay strengthening. Results are in `results/experiment8a_real_replay/`; the packet-local peak proxy limitation is recorded and no Gate V or external result changed.
+11. **Complete:** cross-layer error-attribution synthesis. Results are in `results/cross_layer_attribution/`; incompatible denominators are not aggregated.
+12. **Bilingual working drafts complete, 9 Oct:** targeted primary-source checks and claim boundaries are in `docs/literature-matrix.md`; English and Chinese working manuscripts are `manuscript/draft.md` and `manuscript/draft.zh-CN.md`. These are writing drafts, not submission-ready versions. Preserve the current `models/` contents as historical baselines.
+13. **Continue 9-11 Oct:** use `docs/iotm-style-benchmark.md` for the official format and observed article-style constraints; audit all working references and metadata at their recorded read scope, and refine the contribution-to-evidence map and English wording. Four evidence-linked PDF/PNG figures are now in `manuscript/figures/`, generated by `scripts/build_manuscript_figures.py`; the drafts retain two tables, the registered bridge, and its no-event limitation. Figure 4 uses additive mean stages and separately marks the p95 total, so component p95 values are never summed.
+14. **Complete 9 Oct:** the 8A causal-detector-to-MQTT bridge and fixed channel-1-loss diagnostic are registered and reported in `results/experiment8a_causal_bridge/`. Preserve their artifact hashes and do not silently substitute the packet-local proxy. The narrow linked-event claim passed; the no-event reacquire fallback did not.
+15. **16-30 Oct:** complete the English first version, internal methodology/integrity/CFP review, revisions, and final format/package check according to Section 15. Recheck the NSRDB record-level false escalation limit, the 416.7 ms post-R wait, and the software-only deployment boundary.
+
 ## 18. Rules for Future Agents and Contributors
 
 ### Must
@@ -959,8 +1136,13 @@ paper must report both the original Gate S failure and the Gate S2 decision.
 - Distinguish verified evidence, inference, target, and recommendation.
 - Update the status table and timeline when a gate is completed.
 - Keep the service loop central to architecture and evaluation decisions.
-- Preserve the advisor-approved ECG acquisition-endpoint plus local-gateway partition and keep the latency-critical loop independent of cloud connectivity.
-- Label replay-based acquisition evidence as simulated and separate it from physical acquisition measurements.
+- Preserve the advisor-approved logical acquisition-endpoint plus local-gateway partition and keep the latency-critical loop independent of cloud connectivity.
+- Label replay-based acquisition, local transport, and gateway-process evidence as software simulation/runtime evidence; no physical acquisition interpretation is allowed.
+- Treat the post-Gate-V real ECG replay as exploratory strengthening evidence; it must reuse the frozen model hash, threshold, policy, event schema, lead profile, and MQTT transport.
+- For cross-layer analyses, report each layer's denominator and preserve the distinction between error attribution and an additive error budget.
+- Keep claim-to-evidence links and literature verification current before using novelty language in the manuscript.
+- Keep the 8A causal bridge exploratory and time-boxed; report a failed or incomplete bridge and the channel-1-loss outcome without altering Gate S2, Gate V, or the frozen model/policy.
+- Enforce the magazine's 4,500-word main-text, six combined figure/table, and 15-reference limits during drafting and final review.
 
 ### Must Not
 
@@ -970,17 +1152,22 @@ paper must report both the original Gate S failure and the Gate S2 decision.
 - Count beats as independent patients.
 - Report only accuracy or pooled metrics.
 - Select the best seed after seeing external-test results.
-- Present desktop runtime as device latency.
+- Present software-host runtime as physical device latency.
 - Put cloud inference, cloud orchestration, or Internet availability on the latency-critical local-loop path.
-- Claim physical acquisition latency, energy, or wearable suitability from a replay endpoint.
+- Claim physical acquisition latency, hardware energy, or wearable suitability from a software replay endpoint.
 - Present synthetic fault injection as a clinical pilot.
 - Claim compatibility with arbitrary sample rates or lead counts.
 - Claim novelty before the literature audit.
+- Present synthetic Experiment 8A traffic as real ECG deployment evidence.
+- Present the packet-local peak proxy as the Experiment 5 causal detector or a failed bridge as a passed end-to-end automatic-detection result.
+- Change the frozen policy, model, threshold, event schema, transport profile, or Gate V interpretation through a post-Gate-V exploratory analysis.
+- Claim bandwidth savings from the current MQTT/JSON byte count.
+- Add FHIR or a new policy version to the main evidence without a separately registered protocol and independent evaluation.
 - Delete legacy result artifacts until replacement evidence is verified and archived.
 
 ## 19. Completion Definition
 
-The research phase is ready for paper drafting only when all of the following are true:
+The existing evidence is sufficient to begin English manuscript writing now. Submission readiness requires all of the following:
 
 - Experiment 2.5 is complete under its preregistered ladder, one-backup limit, and stopping rule.
 - Final-architecture M0/M1/M2 and L1/L2 comparisons are complete.
@@ -988,12 +1175,17 @@ The research phase is ready for paper drafting only when all of the following ar
 - One model and threshold are frozen from development evidence only.
 - SVDB and NSRDB evaluations are complete.
 - Automatic R-peak and robustness analyses use the final model.
-- An int8 model has been measured on the declared local gateway, and the declared acquisition endpoint plus local transport path has been measured or explicitly labelled as a replay-based simulation.
-- The event-driven loop closes from ECG acquisition endpoint to local gateway and back to the endpoint with acknowledgement and auditable feedback while Internet connectivity is absent.
+- The int8 model has been measured in the declared software gateway runtime, and the simulated acquisition endpoint plus local transport path are explicitly labelled as software simulation.
+- The event-driven loop closes from the simulated ECG acquisition endpoint to the local gateway process and back to the endpoint with acknowledgement and auditable feedback while Internet connectivity is absent.
 - Fault-injection metrics meet or transparently report the predefined targets.
-- Literature search supports the final novelty wording.
+- Gate V passes using the Experiment 7 software runtime and Experiment 8A software service-loop artifacts.
+- The fixed post-Gate-V real ECG replay strengthening experiment is complete, with the packet-local peak proxy limitation reflected in the manuscript.
+- The cross-layer error-attribution table and report preserve layer-specific denominators and source-artifact links.
+- The time-boxed causal bridge and channel-1-loss diagnostic are completed or explicitly closed with failure evidence by 15 October; manuscript claims match the observed outcome.
+- Verified primary sources support the final novelty wording and every reference and cited claim is checked at its actual read scope.
 - Every result cited in the manuscript has a reproducible artifact path.
+- The accessible manuscript stays within 4,500 main-text words, six figures/tables in total, and 15 references; internal methodology, integrity, CFP-scope, and reproducibility review is complete.
 
-Until then, the project has a promising and well-audited prototype, not a publication-ready closed-loop healthcare system.
+Until then, the project has a promising and well-audited software-simulated prototype, not a publication-ready physical healthcare deployment.
 
 

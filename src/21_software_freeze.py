@@ -231,7 +231,7 @@ def main() -> None:
         "artifacts": {"keras": str(keras_path), "keras_sha256": sha256_file(keras_path), "int8_tflite": str(tflite_path), "int8_tflite_sha256": sha256_file(tflite_path), "source_code_sha256": sha256_file(Path(__file__))},
         "external_data_accessed": False,
         "prohibited_sources": sorted(FORBIDDEN_SOURCES),
-        "pending_deployment_evidence": ["declared_gateway_latency", "gateway_memory", "endpoint_transport", "energy", "Gate H"],
+        "pending_software_loop_evidence": ["software_gateway_latency", "process_memory", "simulated_endpoint_transport", "Experiment 8A", "Experiment 7", "Gate V"],
     }
     (args.result_dir / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({"gate_s": manifest["status"], "candidate": candidate, "manifest": str(args.result_dir / "manifest.json")}, indent=2))

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import tempfile
+import threading
 import unittest
 from pathlib import Path
 
@@ -47,11 +48,40 @@ class ServiceLoopContractTests(unittest.TestCase):
         payload["sample_sequence"] += 1
         self.assertEqual(self.ingest.accept(payload, self.event_factory).reason, "sequence_gap")
 
+    def test_first_observed_packet_must_start_at_zero(self) -> None:
+        packet = self.endpoint.packet([[0.0, 0.0]] * 300)
+        payload = packet.to_dict()
+        payload["sample_sequence"] = 300
+        self.assertEqual(self.ingest.accept(payload, self.event_factory).reason, "sequence_gap")
+
+    def test_sequence_gap_can_be_retried_after_missing_packet(self) -> None:
+        first = self.endpoint.packet([[0.0, 0.0]] * 300, event_id="ordered-0")
+        missing = self.endpoint.packet([[0.0, 0.0]] * 300, event_id="ordered-1")
+        out_of_order = self.endpoint.packet([[0.0, 0.0]] * 300, event_id="ordered-2")
+        self.assertEqual(self.ingest.accept(first.to_dict(), self.event_factory).ack_status, "accepted")
+        self.assertEqual(self.ingest.accept(out_of_order.to_dict(), self.event_factory).reason, "sequence_gap")
+        self.assertEqual(self.ingest.accept(missing.to_dict(), self.event_factory).ack_status, "accepted")
+        self.assertEqual(self.ingest.accept(out_of_order.to_dict(), self.event_factory).ack_status, "accepted")
+        self.assertEqual(self.store.accepted_count(), 3)
+
+    def test_malformed_event_is_persisted_with_reason(self) -> None:
+        ack = self.ingest.accept({"event_id": "malformed", "endpoint_id": self.endpoint.endpoint_id}, self.event_factory)
+        self.assertEqual(ack.ack_status, "rejected")
+        self.assertEqual(self.store.rejected_reason_completeness()["completeness"], 1.0)
+
     def test_model_hash_mismatch_is_rejected(self) -> None:
         packet = self.endpoint.packet([[0.0, 0.0]] * 300)
         payload = packet.to_dict()
         payload["model_sha256"] = "incorrect"
         self.assertEqual(self.ingest.accept(payload, self.event_factory).reason, "model_hash_mismatch")
+
+    def test_contract_version_mismatch_is_rejected_and_audited(self) -> None:
+        packet = self.endpoint.packet([[0.0, 0.0]] * 300)
+        payload = packet.to_dict()
+        payload["contract_version"] = "unsupported-contract"
+        ack = self.ingest.accept(payload, self.event_factory)
+        self.assertEqual(ack.reason, "contract_version_mismatch")
+        self.assertEqual(self.store.rejected_reason_completeness()["completeness"], 1.0)
 
     def test_third_risk_event_requests_review(self) -> None:
         actions = []
@@ -59,6 +89,15 @@ class ServiceLoopContractTests(unittest.TestCase):
             packet = self.endpoint.packet([[0.0, 0.0]] * 300, event_id=f"risk-{index}")
             actions.append(self.ingest.accept(packet.to_dict(), self.event_factory).requested_action)
         self.assertEqual(actions, ["buffer_segment", "buffer_segment", "request_review"])
+
+    def test_gateway_store_accepts_callback_thread(self) -> None:
+        packet = self.endpoint.packet([[0.0, 0.0]] * 300, event_id="threaded-event")
+        acknowledgements = []
+        thread = threading.Thread(target=lambda: acknowledgements.append(self.ingest.accept(packet.to_dict(), self.event_factory)))
+        thread.start()
+        thread.join(timeout=2.0)
+        self.assertFalse(thread.is_alive())
+        self.assertEqual(acknowledgements[0].ack_status, "accepted")
 
 
 if __name__ == "__main__":

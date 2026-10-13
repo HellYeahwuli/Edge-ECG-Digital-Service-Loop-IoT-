@@ -17,20 +17,29 @@ class ReplayEndpoint:
         self.sequence = 0
         self.buffer: OrderedDict[str, ECGPacket] = OrderedDict()
         self.acks: dict[str, Acknowledgement] = {}
+        self.buffer_overflow_count = 0
+        self.generated_packet_count = 0
+        self.generated_sample_count = 0
 
     def packet(self, samples: list[list[float]], event_id: str | None = None) -> ECGPacket:
         event_id = event_id or str(uuid4())
         packet = ECGPacket(event_id, self.endpoint_id, self.gateway_id, self.sequence, utc_now(), self.lead_profile, self.sample_rate_hz, "local_mqtt_v5_qos1", self.model_sha256, self.policy_version, samples)
         self.sequence += len(samples)
         self.buffer[event_id] = packet
+        self.generated_packet_count += 1
+        self.generated_sample_count += len(samples)
         while len(self.buffer) > self.buffer_capacity:
             self.buffer.popitem(last=False)
+            self.buffer_overflow_count += 1
         return packet
 
     def receive_ack(self, payload: dict) -> None:
         ack = Acknowledgement(**payload)
         self.acks[ack.event_id] = ack
-        self.buffer.pop(ack.event_id, None)
+        # Sequence-gap acknowledgements are retryable; retain those packets so
+        # ordered retransmission can succeed after the missing predecessor.
+        if ack.terminal_status != "retryable":
+            self.buffer.pop(ack.event_id, None)
 
     def retransmit(self) -> list[ECGPacket]:
         return list(self.buffer.values())
