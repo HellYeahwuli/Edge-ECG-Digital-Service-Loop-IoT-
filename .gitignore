@@ -31,6 +31,17 @@ tmp/
 outputs/
 manuscript/qa/
 
+# Manuscript drafts, figures, and editorial checks stay local.
+manuscript/
+docs/iotm-style-benchmark.md
+docs/literature-matrix.md
+docs/manuscript-release-check.md
+docs/advisor-draft-audit-*.md
+scripts/build_manuscript_*.py
+scripts/check_manuscript_release.py
+scripts/make_docx_qa_contact.py
+scripts/render_manuscripts_word.ps1
+
 # Platform files and local secrets.
 .DS_Store
 Thumbs.db
