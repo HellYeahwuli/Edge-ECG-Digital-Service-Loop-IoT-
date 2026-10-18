@@ -29,6 +29,7 @@ htmlcov/
 tmp/
 .tmp_ppt_experiment2_5/
 outputs/
+manuscript/qa/
 
 # Platform files and local secrets.
 .DS_Store
